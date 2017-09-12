@@ -81,7 +81,7 @@ Git 主要的版本有 1.X、2.X，最新的是 2.X，使用版本随意，但�
 >> * 第二个按钮：`Commit changes` 提交项目上所有变化文件。点击这个按钮不会立马提交所有文件，而是先弹出一个被修改文件的一个汇总框，具体操作下面会有图片进行专门介绍。
 >> * 第三个按钮：`Compare with the Same Repository Version` 当前文件与服务器上该文件通版本的内容进行比较。如果当前编辑的文件没有修改，则是灰色不可点击。
 >> * 第四个按钮：`Show history` 显示当前文件的历史记录。
->> * 第五个按钮：`Revert` 还原当前被修改的文件到违背修改的版本状态下。如果当前编辑的文件没有修改，则是灰色不可点击。
+>> * 第五个按钮：`Revert` 还原当前被修改的文件到未被修改的版本状态下。如果当前编辑的文件没有修改，则是灰色不可点击。
 
 ![版本控制主要操作按钮](images/xvi-e-version-control-system-operation-introduce-4.jpg)
 
@@ -119,7 +119,7 @@ Git 主要的版本有 1.X、2.X，最新的是 2.X，使用版本随意，但�
 >> * `Optimize imports` 优化导入包，会在自动去掉没有使用的包。这个建议都勾选，这个只对 Java 类有作用，所以不用担心有副作用。 
 >> * `Perform code analysis` 进行代码分析，这个建议不用在提交的时候处理，而是在开发完之后，要专门养成对代码进行分析的习惯。IntelliJ IDEA 集成了代码分析功能。
 >> * `Check TODO` 检查代码中的 `TODO`。`TODO` 功能后面也会有章节进行讲解，这里简单介绍：这是一个记录待办事项的功能。 
->> * `Cleanup` 清除下版本控制系统，去掉一些版本控制系统的错误信息，建议勾选。 
+>> * `Cleanup` 清除下版本控制系统，去掉一些版本控制系统的错误信息，建议勾选（主要针对 SVN，Git 不适用）。 
 > * 如上图标注 4 所示，填写提交的信息。
 > * 如上图标注 5 所示，`Change list` 改变列表，这是一个下拉选项，说明我们可以切换不同的 `Change list`，提交不同的 `Change list` 文件。
 > * 如上图标注箭头所示，我们可以查看我们提交历史中使用的 `Commit Message`，有些时候，我们做得是同一个任务，但是需要提交多次，为了更好管理项目，建议是提交的 `Message` 是保持一致的。
@@ -147,22 +147,63 @@ SVN 的这个窗口有的 IntelliJ IDEA 上叫 `Changes`，有的叫 `Version Co
 
 - 更新的时候报：`Can't update: no tracked branch`
 	- 解决办法：打开 git-bash（路径：C:\Program Files\Git\git-bash.exe），切换到这个更新不下来的项目的根目录，然后输入：`git branch --set-upstream-to origin/master master`，回车之后重新回到 IntelliJ IDEA 进行更新，正常就可以了。
+- 输错密码后，弹出验证的登录框没有再出现：
+	- 解决办法如下图：选择 `Do not save, forget passwords after restart` 等你确定你的密码没错后再选择保存密码方案。
+	
+![Git 常见问题](images/xvi-g-git-problem-1.jpg)
 
 
+## Git Flow 的介绍
 
+### Git Flow 概念
 
+- Git Flow 是一个 git 扩展集，按 Vincent Driessen 的分支模型提供高层次的库操作。这里的重点是 Vincent Driessen 的分支模型思想，下面讲解的内容也是基于 Vincent Driessen 思想。
+	- Vincent Driessen 的观点：<http://nvie.com/posts/a-successful-git-branching-model/>
+	- `Git Flow 是一个 git 扩展集` 你可以理解 Git Flow 是一个基于 Git 的插件，这个插件简化了 Git 一些复杂的命令，比如 Git Flow 用一条命令，就可以代替 Git 原生 10 条命令。
+	- Git Flow 对原生的 Git 不会有任何影响，你可以照旧用 Git 原生命令，也可以使用 Git Flow 命令。
+- 还有其他的一些分支管理模型思想，具体可以看：<http://www.ruanyifeng.com/blog/2015/12/git-workflow.html>
 
+### Git Flow 核心概念
 
+- 必须有的两个核心分支（长期分支）：
+	- master，Git 代码仓库中默认的一条主分支。这条分支上的代码一般都建议为是正式版本的代码，并且这条分支不能进行代码修改，只能用来合并其他分支。
+	- develop，一般用于存储开发过程的代码分支，并且这条分支也不能进行代码修改，只能用来合并其他辅助分支。
+- 根据情况创建的辅助分支（临时分支）
+	- feature branches（功能分支）
+		- **基于 develop 分支上创建**
+		- **开发完成后合并到 develop 分支上**
+		- 当要开始一个新功能的开发时，我门可以创建一个 Feature branches 。等待这个新功能开发完成并确定应用到新版本中就合并回 develop
+		- 对于单人开发的 feature branches，start 之后，开发完成后可以直接 finish。
+		- 对于多人开发的 feature branches，start 之后，开发完成后先 publish 给其他开发人员进行合并，最后大家都开发完成后再 finish。这个思路也同样适用下面几个辅助分支场景。
+		- feature branches 开发过程有 bug，直接在 feature branches 上修改、提交。
+	- release branches（预发布分支）
+		- **基于 develop 分支上创建**
+		- **测试确定新功能没有问题，合并到 develop 分支和 master 分支上**
+		- 用来做新版本发布前的准备工作，在上面可以做一些小的 bug 修复、准备发布版本号等等和发布有关的小改动，其实已经是一个比较成熟的版本了。另外这样我们既可以在预发布分支上做一些发布前准备，也不会影响 "develop" 分支上下一版本的新功能开发。
+	- hotfix branches（基于 master 基础上的生产环境 bug 的修复分支）
+		- **基于 master 分支上创建**
+		- **修复测试无误后合并到 master 分支和 develop 分支上**
+		- 主要用于处理线上版本出现的一些需要立刻修复的 bug 情况
 
+### Git Flow 安装
 
+- Windows：如果你安装 Git 用的是 [Git for Windows](https://git-for-windows.github.io/)，那它已经内置了。
+- Mac：`brew install git-flow-avh`
+- Linux：`wget --no-check-certificate -q  https://raw.githubusercontent.com/petervanderdoes/gitflow-avh/develop/contrib/gitflow-installer.sh && sudo bash gitflow-installer.sh install stable; rm gitflow-installer.sh`
+- 更多版本：<https://github.com/petervanderdoes/gitflow-avh/wiki/Installation>
+- 在系统环境上支持之后，再安装 IntelliJ IDEA 对 Git Flow 支持的插件：<https://plugins.jetbrains.com/plugin/7315-git-flow-integration>
 
+### Git Flow 基础命令资料
 
+- <https://danielkummer.github.io/git-flow-cheatsheet/index.zh_CN.html>
+- <http://www.jianshu.com/p/9e4291078853>
+- <http://stormzhang.com/git/2014/01/29/git-flow/>
 
+### Git Flow Integration 插件的使用
 
+- 如果你已经理解了上面的理论，再看下面这些截图你能理解对应的是什么意思。
 
-
-
-
+![Git Flow Integration 插件的使用](images/xvi-h-git-flow-feature-1.png)
 
 
 
